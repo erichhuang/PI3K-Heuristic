@@ -1,4 +1,4 @@
-## buildHeuristicModel.R
+## buildPrelimHeuristic.R
 
 ## Erich S. Huang, MD, PhD
 ## Sage Bionetworks
@@ -44,4 +44,10 @@ buildHeuristicModel <- function(listObj){
                                   do.trace = 2,
                                   importance = TRUE,
                                   proximity = TRUE)
+  
+  returnList <- list('trainExpress' = trainExpress,
+                     'validExpress' = validExpress,
+                     'trainClass' = trainClass,
+                     'validClass' = validClass,
+                     'pi3kPrelimModel' = pi3kPrelimModel)
 }
