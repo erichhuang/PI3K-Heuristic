@@ -15,6 +15,9 @@ prepareData <- function(listObj){
   require(corpcor)
     
   ## INTERSECT ALL OF THE PATIENT IDS
+  cat('[3] Taking the list object generated from loadData() and\n')
+  cat('    intersecting by unique patient IDs\n')
+  
   idList <- list('pik3ca' = rownames(listObj$pi3kInd),
                  'pten' = rownames(listObj$ptenInd),
                  'pik3r1' = rownames(listObj$pik3r1Ind),
@@ -24,6 +27,7 @@ prepareData <- function(listObj){
   idIntersect <- Reduce(intersect, idList)
   
   ## CREATE A DATAFRAME FOR ALL THE MUTATIONS
+  cat('[4] Creating a dataframe from the intersected mutation data\n')
   mutationDF <- data.frame(listObj$pi3kInd[idIntersect, 2],
                            listObj$ptenInd[idIntersect, 2],
                            listObj$pik3r1Ind[idIntersect, 2],
@@ -32,6 +36,8 @@ prepareData <- function(listObj){
   colnames(mutationDF) <- c('pik3ca', 'pten', 'pik3r1', 'akt')
   
   ## FOR FORWARD COMPATIBILITY, INTERSECT WITH AFFYMETRIX ENTREZ IDS
+  cat('[5] Performing a feature intersect with Entrez IDs for forward\n')
+  cat('    compatibility with Sanger and CCLE data\n')
   affyFeatEnt <- loadEntity('syn1584462')
   affyFeatures <- affyFeatEnt$objects$sangEntrezFeatures
   ## intersect the RNA Seq ENTREZ IDs with the Affymetrix ENTREZ IDs
@@ -41,6 +47,7 @@ prepareData <- function(listObj){
   intersectExpress <- listObj$brcaRnaSeq[featIntersect, idIntersect]
   
   ## INSPECT FOR OUTLIERS
+  cat('[6] Removing outlier samples\n')
   svdDat <- fast.svd(intersectExpress)
   # plot(svdDat$v[ , 1], svdDat$v[ , 2])
   
@@ -49,6 +56,7 @@ prepareData <- function(listObj){
   intersectExpress <- intersectExpress[ , -outlierSamps]
   mutationDF <- mutationDF[-outlierSamps, ]
   
+  cat('[7] Returning objects as a list to Workspace\n')
   returnList <- list('intersectExpress' = intersectExpress,
                      'mutationDF' = mutationDF)
   
