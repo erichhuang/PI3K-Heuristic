@@ -23,8 +23,8 @@ loadData <- function(){
   brcaRnaSeq <- exprs(brcaEset)
   
   # Read in mutation indicators for pi3k pathway related genes from cbio
-  pi3kInd <- read.table('mutations/pi3kIndicatorUpdate.txt')
-  rownames(pi3kInd) <- pi3kInd[ , 1]
+  pi3kInd <- read.table('mutations/pi3kIndicatorUpdate.txt') # Need to revise for switch
+  rownames(pi3kInd) <- pi3kInd[ , 1]                         # to Synapse files
   
   ptenInd <- read.table('mutations/ptenIndicatorUpdate.txt')
   rownames(ptenInd) <- ptenInd[ , 1]
