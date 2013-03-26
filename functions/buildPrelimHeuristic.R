@@ -8,7 +8,7 @@
 ## Now build the PIK3CA mutation-based pathway heuristic model
 ## 
 
-buildHeuristicModel <- function(listObj){
+buildPrelimHeuristic <- function(listObj){
   require(randomForest)
   
   ## MUTATION EXCLUSIVITY INDICATOR
@@ -59,11 +59,12 @@ buildHeuristicModel <- function(listObj){
   rankSum <- wilcox.test(validScoreHat[validNumeric == 0, 2], 
                          validScoreHat[validNumeric == 1, 2])
   
+  cat('[12] Returning objects as a list to Workspace\n')
   returnList <- list('trainExpress' = trainExpress,
                      'validExpress' = validExpress,
                      'trainClass' = trainClass,
                      'validClass' = validClass,
-                     'pi3kPrelimModel' = pi3kPrelimModel,
+                     'model' = pi3kPrelimModel,
                      'validScoreHat' = validScoreHat,
                      'rankSum' = rankSum)
 }
