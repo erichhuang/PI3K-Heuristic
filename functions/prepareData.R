@@ -9,10 +9,14 @@
 ## working on the full union of samples and make it into a 
 ## dataframe.
 
-prepareData <- function(listObj){
+prepareData <- function(synID){
   ## REQUIRE
   require(synapseClient)
   require(corpcor)
+  
+  ## Load Entity
+  synEnt <- loadEntity(synID)
+  listObj <- synEnt$objects[[1]]
     
   ## INTERSECT ALL OF THE PATIENT IDS
   cat('[3] Taking the list object generated from loadData() and\n')
