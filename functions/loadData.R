@@ -23,25 +23,38 @@ loadData <- function(){
   brcaRnaSeq <- exprs(brcaEset)
   
   # Read in mutation indicators for pi3k pathway related genes from cbio
-  pi3kInd <- read.table('mutations/pi3kIndicatorUpdate.txt') # Need to revise for switch
-  rownames(pi3kInd) <- pi3kInd[ , 1]                         # to Synapse files
+#   pi3kInd <- read.table('mutations/pi3kIndicatorUpdate.txt') # Need to revise for switch
+#   rownames(pi3kInd) <- pi3kInd[ , 1]                         # to Synapse files
+#   
+#   ptenInd <- read.table('mutations/ptenIndicatorUpdate.txt')
+#   rownames(ptenInd) <- ptenInd[ , 1]
+#   
+#   pik3r1Ind <- read.table('mutations/pik3r1Indicator.txt')
+#   rownames(pik3r1Ind) <- pik3r1Ind[ , 1]
+#   
+#   aktInd <- read.table('mutations/akt1Indicator.txt')
+#   rownames(aktInd) <- aktInd[ , 1]
   
-  ptenInd <- read.table('mutations/ptenIndicatorUpdate.txt')
-  rownames(ptenInd) <- ptenInd[ , 1]
+  aktEnt <- loadEntity('syn1728346')
+  aktInd <- aktEnt$objects$object
   
-  pik3r1Ind <- read.table('mutations/pik3r1Indicator.txt')
-  rownames(pik3r1Ind) <- pik3r1Ind[ , 1]
+  pik3caEnt <- loadEntity('syn1728330')
+  pik3caInd <- pik3caEnt$objects$pik3caInd
   
-  aktInd <- read.table('mutations/akt1Indicator.txt')
-  rownames(aktInd) <- aktInd[ , 1]
+  pik3r1Ent <- loadEntity('syn1728348')
+  pik3r1Ind <- pik3r1Ent$objects$object
   
+  ptenEnt <- loadEntity('syn1728344')
+  ptenInd <- ptenEnt$objects$object
+  
+  # Make sure the column names of the RNA seq data are compatible
   colnames(brcaRnaSeq) <- sapply(strsplit(colnames(brcaRnaSeq), '-'), function(x){
-    paste(x[1:3], collapse="-")
+    paste(x[1:3], collapse = "-")
   })
   
   cat('[2] Returning objects as a list to Workspace\n')
   datReturn <- list('brcaRnaSeq' = brcaRnaSeq,
-                    'pi3kInd' = pi3kInd,
+                    'pik3caInd' = pik3caInd,
                     'ptenInd' = ptenInd,
                     'pik3r1Ind' = pik3r1Ind,
                     'aktInd' = aktInd)
