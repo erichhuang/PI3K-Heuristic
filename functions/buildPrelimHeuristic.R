@@ -8,7 +8,7 @@
 ## Now build the PIK3CA mutation-based pathway heuristic model
 ## 
 
-buildPrelimHeuristic <- function(listObj){
+buildPrelimHeuristic <- function(){
   require(randomForest)
   require(synapseClient)
   

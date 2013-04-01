@@ -1,4 +1,4 @@
-## prepareData Code Entity
+## buildPrelimHeuristic Code Entity
 
 ## Erich S. Huang
 ## Sage Bionetworks
