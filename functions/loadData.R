@@ -51,13 +51,18 @@ loadData <- function(){
   colnames(brcaRnaSeq) <- sapply(strsplit(colnames(brcaRnaSeq), '-'), function(x){
     paste(x[1:3], collapse = "-")
   })
-  
+    
   cat('[2] Returning objects as a list to Workspace\n')
   datReturn <- list('brcaRnaSeq' = brcaRnaSeq,
                     'pik3caInd' = pik3caInd,
                     'ptenInd' = ptenInd,
                     'pik3r1Ind' = pik3r1Ind,
                     'aktInd' = aktInd)
+  
+  cat('[3] Sending objects as a list to Synapse\n')
+  datEnt <- loadEntity('syn1729632')
+  datEnt <- addObject(datEnt, datReturn, name = 'object')
+  datEnt <- storeEntity(datEnt)
   
   return(datReturn)
 }

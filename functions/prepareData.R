@@ -9,20 +9,20 @@
 ## working on the full union of samples and make it into a 
 ## dataframe.
 
-prepareData <- function(synID){
+prepareData <- function(listObj){
   ## REQUIRE
   require(synapseClient)
   require(corpcor)
   
-  ## Load Entity
-  synEnt <- loadEntity(synID)
-  listObj <- synEnt$objects[[1]]
+#   ## Load Entity
+#   synEnt <- loadEntity(synID)
+#   listObj <- synEnt$objects[[1]]
     
   ## INTERSECT ALL OF THE PATIENT IDS
-  cat('[3] Taking the list object generated from loadData() and\n')
+  cat('[4] Taking the list object generated from loadData() and\n')
   cat('    intersecting by unique patient IDs\n')
   
-  idList <- list('pik3ca' = rownames(listObj$pi3kInd),
+  idList <- list('pik3ca' = rownames(listObj$pik3caInd),
                  'pten' = rownames(listObj$ptenInd),
                  'pik3r1' = rownames(listObj$pik3r1Ind),
                  'akt' = rownames(listObj$aktInd),
@@ -31,8 +31,8 @@ prepareData <- function(synID){
   idIntersect <- Reduce(intersect, idList)
   
   ## CREATE A DATAFRAME FOR ALL THE MUTATIONS
-  cat('[4] Creating a dataframe from the intersected mutation data\n')
-  mutationDF <- data.frame(listObj$pi3kInd[idIntersect, 2],
+  cat('[5] Creating a dataframe from the intersected mutation data\n')
+  mutationDF <- data.frame(listObj$pik3caInd[idIntersect, 2],
                            listObj$ptenInd[idIntersect, 2],
                            listObj$pik3r1Ind[idIntersect, 2],
                            listObj$aktInd[idIntersect, 2])
@@ -40,7 +40,7 @@ prepareData <- function(synID){
   colnames(mutationDF) <- c('pik3ca', 'pten', 'pik3r1', 'akt')
   
   ## FOR FORWARD COMPATIBILITY, INTERSECT WITH AFFYMETRIX ENTREZ IDS
-  cat('[5] Performing a feature intersect with Entrez IDs for forward\n')
+  cat('[6] Performing a feature intersect with Entrez IDs for forward\n')
   cat('    compatibility with Sanger and CCLE data\n')
   affyFeatEnt <- loadEntity('syn1584462')
   affyFeatures <- affyFeatEnt$objects$sangEntrezFeatures
@@ -51,7 +51,7 @@ prepareData <- function(synID){
   intersectExpress <- listObj$brcaRnaSeq[featIntersect, idIntersect]
   
   ## INSPECT FOR OUTLIERS
-  cat('[6] Removing outlier samples\n')
+  cat('[7] Removing outlier samples\n')
   svdDat <- fast.svd(intersectExpress)
   # plot(svdDat$v[ , 1], svdDat$v[ , 2])
   
@@ -60,7 +60,15 @@ prepareData <- function(synID){
   intersectExpress <- intersectExpress[ , -outlierSamps]
   mutationDF <- mutationDF[-outlierSamps, ]
   
-  cat('[7] Returning objects as a list to Workspace\n')
+  cat('[8] Sending intermediate objects up to Synapse\n')
+  intEnt <- loadEntity('syn1729346')
+  intEnt <- addObject(intEnt, intersectExpress)
+  intEnt <- storeEntity(intEnt)
+  mutEnt <- loadEntity('syn1729370')
+  mutEnt <- addObject(mutEnt, mutationDF)
+  mutEnt <- storeEntity(mutEnt)
+  
+  cat('[9] Returning objects as a list to Workspace\n')
   returnList <- list('intersectExpress' = intersectExpress,
                      'mutationDF' = mutationDF)
   
