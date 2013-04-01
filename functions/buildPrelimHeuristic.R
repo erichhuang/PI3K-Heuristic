@@ -10,25 +10,33 @@
 
 buildPrelimHeuristic <- function(listObj){
   require(randomForest)
+  require(synapseClient)
+  
+  ## LOAD DATA OBJECTS FROM SYNAPSE
+  mutEnt <- loadEntity('syn1729370')
+  intExEnt <- loadEntity('syn1729346')
+  
+  mutationDF <- mutEnt$objects$mutationDF
+  intersectExpress <- intExEnt$objects$intersectExpress
   
   ## MUTATION EXCLUSIVITY INDICATOR
-  cat('[8] Identifying samples that only have single locus PI3K pathway mutations\n')
-  excInd <- apply(listObj$mutationDF, 1, sum)
+  cat('[10] Identifying samples that only have single locus PI3K pathway mutations\n')
+  excInd <- apply(mutationDF, 1, sum)
   ## 6 samples have mutations at two of our loci of interest
-  exclusivePi3k <- rownames(listObj$mutationDF)[listObj$mutationDF$pi3k == 1 & excInd < 2]
-  exclusivePten <- rownames(listObj$mutationDF)[listObj$mutationDF$pten == 1 & excInd < 2]
-  exclusivePik3r1 <- rownames(listObj$mutationDF)[listObj$mutationDF$pik3r1 == 1 & excInd < 2]
-  exclusiveAkt <- rownames(listObj$mutationDF)[listObj$mutationDF$akt == 1 & excInd < 2]
+  exclusivePi3k <- rownames(mutationDF)[mutationDF$pi3k == 1 & excInd < 2]
+  exclusivePten <- rownames(mutationDF)[mutationDF$pten == 1 & excInd < 2]
+  exclusivePik3r1 <- rownames(mutationDF)[mutationDF$pik3r1 == 1 & excInd < 2]
+  exclusiveAkt <- rownames(mutationDF)[mutationDF$akt == 1 & excInd < 2]
   
   allExc <- c(exclusivePi3k, exclusivePten, exclusivePik3r1, exclusiveAkt)
   
   ## WE WANT TO BUILD THE MODEL ON EXCLUSIVELY PI3K MUTANT PATIENTS VERSUS WT
   cat('[9] Subsetting the data on WT versus PIK3CA mutant samples\n')
-  wtExpress <- listObj$intersectExpress[ , !colnames(listObj$intersectExpress) %in% allExc]
-  pi3kExpress <- listObj$intersectExpress[ , exclusivePi3k]
+  wtExpress <- intersectExpress[ , !colnames(intersectExpress) %in% allExc]
+  pi3kExpress <- intersectExpress[ , exclusivePi3k]
   
   ## RANDOMLY DIVIDE INTO TRAINING AND VALIDATION COHORTS
-  cat('[10] Dividing the data into training & validation cohorts\n')
+  cat('[11] Dividing the data into training & validation cohorts\n')
   set.seed(1212121745)
   wtSampInd <- sample(1:dim(wtExpress)[2], dim(wtExpress)[2]/2)
   pi3kSampInd <- sample(1:dim(pi3kExpress)[2], dim(pi3kExpress)[2]/2)
@@ -39,11 +47,11 @@ buildPrelimHeuristic <- function(listObj){
   validExpress <- cbind(wtExpress[ , -wtSampInd],
                         pi3kExpress[ , -pi3kSampInd])
   
-  trainClass <- listObj$mutationDF[colnames(trainExpress), 1]
-  validClass <- listObj$mutationDF[colnames(validExpress), 1]
+  trainClass <- mutationDF[colnames(trainExpress), 1]
+  validClass <- mutationDF[colnames(validExpress), 1]
   
   ## GENERATE THE NEW RANDOM FOREST MODEL PHASE 1
-  cat('[11] Building prototype PI3K heuristic model\n')
+  cat('[12] Building prototype PI3K heuristic model\n')
   pi3kPrelimModel <- randomForest(t(trainExpress),
                                   as.factor(trainClass),
                                   ntree = 500,
@@ -59,7 +67,32 @@ buildPrelimHeuristic <- function(listObj){
   rankSum <- wilcox.test(validScoreHat[validNumeric == 0, 2], 
                          validScoreHat[validNumeric == 1, 2])
   
-  cat('[12] Returning objects as a list to Workspace\n')
+  ## SENDING INTERMEDIATE OBJECTS UP TO SYNAPSE
+  trainExEnt <- loadEntity('syn1730122')
+  trainExEnt <- addObject(trainExEnt, trainExpress)
+  trainExEnt <- storeEntity(trainExEnt)
+  
+  validExEnt <- loadEntity('syn1730123')
+  validExEnt <- addObject(validExEnt, validExpress)
+  validExEnt <- storeEntity(validExEnt)
+  
+  tClassEnt <- loadEntity('syn1730124')
+  tClassEnt <- addObject(tClassEnt, trainClass)
+  tClassEnt <- storeEntity(tClassEnt)
+  
+  vClassEnt <- loadEntity('syn1730125')
+  vClassEnt <- addObject(vClassEnt, validClass)
+  vClassEnt <- storeEntity(vClassEnt)
+  
+  modEnt <- loadEntity('syn1730126')
+  modEnt <- addObject(modEnt, pi3kPrelimModel)
+  modEnt <- storeEntity(modEnt)
+  
+  vClassHatEnt <- loadEntity('syn1730127')
+  vClassHatEnt <- addObject(vClassHatEnt, validScoreHat)
+  vClassHatEnt <- storeEntity(vClassHatEnt)
+  
+  cat('[14] Returning objects as a list to Workspace\n')
   returnList <- list('trainExpress' = trainExpress,
                      'validExpress' = validExpress,
                      'trainClass' = trainClass,
