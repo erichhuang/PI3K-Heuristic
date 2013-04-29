@@ -18,10 +18,19 @@ loadData <- function(){
   cat('[1] Loading Synapse entities & accessory files\n')
   ## LOAD DATA
   # tcga rna seq data from metagenomics
-  brcaEnt <- loadEntity('syn595321')
-  brcaEset <- brcaEnt$objects$eset
-  brcaRnaSeq <- exprs(brcaEset)
-  
+#   brcaEnt <- loadEntity('syn595321')
+#   brcaEset <- brcaEnt$objects$eset
+  #   brcaRnaSeq <- exprs(brcaEset)
+  #   
+    
+  # tcga rna seq data from the TCGA Pan Can synapse project
+  cat('[1.1] Reading Pan-Cancer Project RNA Seq data into memory\n')
+  rnaSeqEnt <- loadEntity('syn1446183')
+  brcaRnaSeq <- read.delim(file.path(rnaSeqEnt$cacheDir, rnaSeqEnt$files), header = F, as.is = T)
+  colnames(brcaRnaSeq) <- brcaRnaSeq[1, ]
+  rownames(brcaRnaSeq) <- brcaRnaSeq[ , 1]
+  brcaRnaSeq <- brcaRnaSeq[-1, -1]
+
   # Read in mutation indicators for pi3k pathway related genes from cbio
 #   pi3kInd <- read.table('mutations/pi3kIndicatorUpdate.txt') # Need to revise for switch
 #   rownames(pi3kInd) <- pi3kInd[ , 1]                         # to Synapse files
@@ -35,6 +44,7 @@ loadData <- function(){
 #   aktInd <- read.table('mutations/akt1Indicator.txt')
 #   rownames(aktInd) <- aktInd[ , 1]
   
+  cat('[1.2] Reading CBio Mutsig calls into memory\n')
   aktEnt <- loadEntity('syn1728346')
   aktInd <- aktEnt$objects$object
   
@@ -60,7 +70,7 @@ loadData <- function(){
                     'aktInd' = aktInd)
   
   cat('[3] Sending objects as a list to Synapse\n')
-  datEnt <- loadEntity('syn1729632')
+  datEnt <- loadEntity('syn1809484')
   datEnt <- addObject(datEnt, datReturn, name = 'object')
   datEnt <- storeEntity(datEnt)
   
