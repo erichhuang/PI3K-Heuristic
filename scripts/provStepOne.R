@@ -22,7 +22,7 @@ pik3r1Ent <- getEntity('syn1728348')
 ptenEnt <- getEntity('syn1728344')
 
 ## INTERMEDIATE RESULT
-stepOneOutput <- getEntity('syn1809484')
+stepOneOutput <- getEntity('syn1810387')
 
 ## CODE USED
 stepOneLink <- getPermlink(codeRepo, 'functions/loadData.R')

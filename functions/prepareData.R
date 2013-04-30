@@ -44,10 +44,13 @@ prepareData <- function(listObj){
   cat('    compatibility with Sanger and CCLE data\n')
   affyFeatEnt <- loadEntity('syn1584462')
   affyFeatures <- affyFeatEnt$objects$sangEntrezFeatures
+  affyFeatures <- unlist(lapply(strsplit(affyFeatures, '_'), function(x){ x[1] }))
   ## intersect the RNA Seq ENTREZ IDs with the Affymetrix ENTREZ IDs
-  featIntersect <- intersect(rownames(listObj$brcaRnaSeq), affyFeatures)
+  rnaSeqRows <- unlist(lapply(strsplit(rownames(listObj$brcaRnaSeq), '|', fixed = TRUE), function(x){ x[2] }))
+  featIntersect <- intersect(rnaSeqRows, affyFeatures)
   
   ## INTERSECT THE RNA SEQ DATA
+  rownames(listObj$brcaRnaSeq) <- rnaSeqRows
   intersectExpress <- listObj$brcaRnaSeq[featIntersect, idIntersect]
   
   ## INSPECT FOR OUTLIERS
@@ -55,16 +58,16 @@ prepareData <- function(listObj){
   svdDat <- fast.svd(intersectExpress)
   # plot(svdDat$v[ , 1], svdDat$v[ , 2])
   
-  ## Looks like removing samples < -0.3 on Eigengene 2 is an easy win
-  outlierSamps <- grep('TRUE', svdDat$v[ , 2] < -0.3)
+  ## Looks like removing samples > 0.05 on Eigengene 2 is an easy win
+  outlierSamps <- grep('TRUE', svdDat$v[ , 2] > 0.05)
   intersectExpress <- intersectExpress[ , -outlierSamps]
   mutationDF <- mutationDF[-outlierSamps, ]
   
   cat('[8] Sending intermediate objects up to Synapse\n')
-  intEnt <- loadEntity('syn1729346')
+  intEnt <- loadEntity('syn1810391') ######
   intEnt <- addObject(intEnt, intersectExpress)
   intEnt <- storeEntity(intEnt)
-  mutEnt <- loadEntity('syn1729370')
+  mutEnt <- loadEntity('syn1810390') #######
   mutEnt <- addObject(mutEnt, mutationDF)
   mutEnt <- storeEntity(mutEnt)
   
