@@ -13,8 +13,8 @@ buildPrelimHeuristic <- function(){
   require(synapseClient)
   
   ## LOAD DATA OBJECTS FROM SYNAPSE
-  mutEnt <- loadEntity('syn1729370')
-  intExEnt <- loadEntity('syn1729346')
+  mutEnt <- loadEntity('syn1810390')
+  intExEnt <- loadEntity('syn1810391')
   
   mutationDF <- mutEnt$objects$mutationDF
   intersectExpress <- intExEnt$objects$intersectExpress
@@ -23,7 +23,7 @@ buildPrelimHeuristic <- function(){
   cat('[10] Identifying samples that only have single locus PI3K pathway mutations\n')
   excInd <- apply(mutationDF, 1, sum)
   ## 6 samples have mutations at two of our loci of interest
-  exclusivePi3k <- rownames(mutationDF)[mutationDF$pi3k == 1 & excInd < 2]
+  exclusivePi3k <- rownames(mutationDF)[mutationDF$pik3ca == 1 & excInd < 2]
   exclusivePten <- rownames(mutationDF)[mutationDF$pten == 1 & excInd < 2]
   exclusivePik3r1 <- rownames(mutationDF)[mutationDF$pik3r1 == 1 & excInd < 2]
   exclusiveAkt <- rownames(mutationDF)[mutationDF$akt == 1 & excInd < 2]
@@ -68,27 +68,27 @@ buildPrelimHeuristic <- function(){
                          validScoreHat[validNumeric == 1, 2])
   
   ## SENDING INTERMEDIATE OBJECTS UP TO SYNAPSE
-  trainExEnt <- loadEntity('syn1730122')
+  trainExEnt <- loadEntity('syn1810659')
   trainExEnt <- addObject(trainExEnt, trainExpress)
   trainExEnt <- storeEntity(trainExEnt)
   
-  validExEnt <- loadEntity('syn1730123')
+  validExEnt <- loadEntity('syn1810660')
   validExEnt <- addObject(validExEnt, validExpress)
   validExEnt <- storeEntity(validExEnt)
   
-  tClassEnt <- loadEntity('syn1730124')
+  tClassEnt <- loadEntity('syn1810661')
   tClassEnt <- addObject(tClassEnt, trainClass)
   tClassEnt <- storeEntity(tClassEnt)
   
-  vClassEnt <- loadEntity('syn1730125')
+  vClassEnt <- loadEntity('syn1810662')
   vClassEnt <- addObject(vClassEnt, validClass)
   vClassEnt <- storeEntity(vClassEnt)
   
-  modEnt <- loadEntity('syn1730126')
+  modEnt <- loadEntity('syn1810663')
   modEnt <- addObject(modEnt, pi3kPrelimModel)
   modEnt <- storeEntity(modEnt)
   
-  vClassHatEnt <- loadEntity('syn1730127')
+  vClassHatEnt <- loadEntity('syn1810664')
   vClassHatEnt <- addObject(vClassHatEnt, validScoreHat)
   vClassHatEnt <- storeEntity(vClassHatEnt)
   

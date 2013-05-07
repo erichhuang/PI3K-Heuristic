@@ -11,19 +11,35 @@ buildHeuristic <- function(prelimObj){
   require(randomForest)
   require(plyr)
   require(gtools)
+  require(synapseClient)
+  
+  cat('Loading preliminary model\n')
+  prelimEnt <- loadEntity('syn1810663')
+  prelimMod <- prelimEnt$objects$pi3kPrelimModel
+  
+  cat('Loading training transcriptome data\n')
+  trainExEnt <- loadEntity('syn1810659')
+  trainEx <- trainExEnt$objects$
   
   cat('Using the preliminary model importance metrics to identify a\n')
   cat('reduced feature set\n')
   
-  impMat <- importance(prelimObj$model)
+  impMat <- importance(prelimMod)
   impDF <- as.data.frame(impMat)
   impDF <- data.frame(rownames(impDF), impDF)
   mdaQuant <- quantcut(impDF$MeanDecreaseAccuracy)
   mdgQuant <- quantcut(impDF$MeanDecreaseGini)
-  mdaQuantLev <- levels(mdaQuant)
-  mdgQuantLev <- levels(mdgQuant)
-  topMdaProbes <- impDF[mdaQuant == mdaQuantLev[3], 1]
-  topMdgProbes <- impDF[mdgQuant == mdgQuantLev[4], 1]
+  mdaQuantNum <- as.numeric(mdaQuant)
+  mdgQuantNum <- as.numeric(mdgQuant)
+
+#   mdaQuantLev <- levels(mdaQuant)
+#   mdgQuantLev <- levels(mdgQuant)
+  
+#   topMdaProbes <- impDF[mdaQuant == mdaQuantLev[3], 1]
+#   topMdgProbes <- impDF[mdgQuant == mdgQuantLev[4], 1]
+  
+  topMdaProbes <- impDF[mdaQuantNum >= 3, 1]
+  topMdgProbes <- impDF[mdgQuantNum == 4, 1]
   
   selectProbes <- intersect(as.character(topMdaProbes), as.character(topMdgProbes))
   
