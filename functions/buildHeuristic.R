@@ -19,7 +19,15 @@ buildHeuristic <- function(prelimObj){
   
   cat('Loading training transcriptome data\n')
   trainExEnt <- loadEntity('syn1810659')
-  trainEx <- trainExEnt$objects$
+  trainExpress <- trainExEnt$objects$trainExpress
+  
+  cat('Loading training class vector\n')
+  trainClassEnt <- loadEntity('syn1810661')
+  trainClass <- trainClassEnt$objects$trainClass
+  
+  cat('Loading validation transcriptome data\n')
+  validExEnt <- loadEntity('syn1810660')
+  validExpress <- validExEnt$objects$validExpress
   
   cat('Using the preliminary model importance metrics to identify a\n')
   cat('reduced feature set\n')
@@ -43,16 +51,16 @@ buildHeuristic <- function(prelimObj){
   
   selectProbes <- intersect(as.character(topMdaProbes), as.character(topMdgProbes))
   
-  prelimObj$trainExpress <- prelimObj$trainExpress[selectProbes, ]
-  prelimObj$validExpress <- prelimObj$validExpress[selectProbes, ]
+  trainExpress <- trainExpress[selectProbes, ]
+  validExpress <- validExpress[selectProbes, ]
   
   cat('Generating a new PI3K pathway heuristic model on a reduced feature set\n')
   
-  pi3kSelectModel <- randomForest(t(prelimObj$trainExpress),
+  pi3kSelectModel <- randomForest(t(trainExpress),
                                   as.factor(trainClass),
                                   ntree = 500,
                                   do.trace = 2,
                                   importance = TRUE,
                                   proximity = TRUE)
-  validScoreHat <- predict(pi3kSelectModel, t(prelimObj$validExpress), type = 'prob')
+  validScoreHat <- predict(pi3kSelectModel, t(validExpress), type = 'prob')
 }
