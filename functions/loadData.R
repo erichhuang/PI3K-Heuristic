@@ -25,7 +25,7 @@ loadData <- function(){
     
   # tcga rna seq data from the TCGA Pan Can synapse project
   cat('[1.1] Reading Pan-Cancer Project RNA Seq data into memory\n')
-  rnaSeqEnt <- loadEntity('syn1446183')
+  rnaSeqEnt <- synGet('syn1446183')
   brcaRnaSeq <- read.delim(file.path(rnaSeqEnt$cacheDir, rnaSeqEnt$files), header = F, as.is = T)
   colnames(brcaRnaSeq) <- brcaRnaSeq[1, ]
   seqRows <- brcaRnaSeq[ , 1]
